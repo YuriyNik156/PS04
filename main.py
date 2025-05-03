@@ -1,10 +1,13 @@
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 import time
 
-service = Service(r"C:\Users\Юрий\Desktop\Google Chrome\chromedriver.exe")
 browser = webdriver.Chrome()
 browser.get("https://ru.m.wikipedia.org/")
-time.sleep(10)
-browser.quit()
+browser.save_screenshot("dom.png")
+time.sleep(5)
+browser.get("https://ru.wikipedia.org/wiki/Selenium")
+browser.save_screenshot("selenium.png")
+time.sleep(3)
+browser.refresh()
 
+input("Нажмите Enter, чтобы завершить скрипт")
