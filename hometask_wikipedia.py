@@ -1,3 +1,13 @@
+# Напишите программу, с помощью которой можно искать информацию на Википедии с помощью консоли.
+# 1. Спрашивать у пользователя первоначальный запрос.
+# 2. Переходить по первоначальному запросу в Википедии.
+# 3. Предлагать пользователю три варианта действий:
+# 3.1. листать параграфы текущей статьи;
+# 3.2. перейти на одну из связанных страниц — и снова выбор из двух пунктов:
+# - листать параграфы статьи;
+# - перейти на одну из внутренних статей.
+# 3.3. выйти из программы.
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -30,10 +40,14 @@ def search_page(query):
         if valid_links:
             for i, (title, url) in enumerate(valid_links.items(), 1):
                 print(f"{i}. {title}")
-            choice = int(input("Введите номер статьи: "))
-            selected_url = list(valid_links.values())[choice - 1]
-            browser.get(selected_url)
-            time.sleep(2)
+            try:
+                choice = int(input("Введите номер статьи: "))
+                selected_url = list(valid_links.values())[choice - 1]
+                browser.get(selected_url)
+                time.sleep(2)
+            except (ValueError, IndexError):
+                print("Некорректный выбор. Попробуйте снова.")
+                return False
         else:
             print("Не удалось найти подходящую статью. Попробуйте другой запрос.")
             return False
@@ -98,22 +112,27 @@ def main():
                         print("В статье нет связанных ссылок.")
                         continue
 
-                    print("Выберите связанную статью:")
-                    for i, (title, url) in enumerate(links.items(), 1):
+                    print("Выберите одну из связанных статей:")
+                    valid_links = {title: url for title, url in links.items() if title}
+                    for i, (title, url) in enumerate(valid_links.items(), 1):
                         print(f"{i}. {title}")
-                    choice = int(input("Введите номер статьи: "))
-                    selected_url = list(links.values())[choice - 1]
-                    browser.get(selected_url)
-                    time.sleep(2)
+
+                    try:
+                        choice = int(input("Введите номер статьи: "))
+                        selected_url = list(valid_links.values())[choice - 1]
+                        browser.get(selected_url)
+                        time.sleep(2)
+                    except (ValueError, IndexError):
+                        print("Некорректный выбор. Попробуйте снова.")
+                        continue
                 elif action == "3":
-                    print("Выход из программы.")
+                    print("Выход из программы...")
                     browser.quit()
                     return
                 else:
-                    print("Неверный ввод. Попробуйте еще раз.")
-    except Exception as e:
-        print(f"Произошла ошибка: {e}")
-    finally:
+                    print("Некорректный выбор. Попробуйте снова.")
+    except KeyboardInterrupt:
+        print("\nВыход из программы...")
         browser.quit()
 
 if __name__ == "__main__":
